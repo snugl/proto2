@@ -3,13 +3,19 @@ import sys
 
 import lex
 import tree
+import emission
 
 
 def compile(path):
     stream = lex.tokenize(path)
-    root = tree.parse(stream)
+    root = tree.Node.parse(stream, root=True)
 
-    print(stream)
+    output = emission.Buffer()
+    root.infer()
+
+    print(root.locals)
+
+    print(output.buffer)
 
 
 

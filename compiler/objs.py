@@ -7,16 +7,19 @@ import sym
 
 @dataclass
 class _put:
-    lhs : expr.node
-    rhs : expr.node
+    target : expr.node
+    expr : expr.node
+
+    def infer(self, scope):
+        scope.alloc_var(self.target)
     
     @classmethod
     def parse(cls, stream):
-        lhs = stream.pop()
+        target = stream.pop()
         stream.expect("=")
-        rhs = expr.parse(stream)
+        node = expr.parse(stream)
 
-        return cls(lhs, rhs)
+        return cls(target, node)
 
 @dataclass
 class _print:
