@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import expr
 import error
 import sym
+import util
 
 @dataclass
 class _put:
@@ -12,6 +13,13 @@ class _put:
 
     def infer(self, scope):
         scope.alloc_var(self.target)
+
+    def generate(self, output, scope):
+        self.expr.generate(output, scope)
+
+        addr = util.var_to_addr(scope.locals[self.target])
+        output('mov', f'[rbp-{addr}]', 'rax')
+        
     
     @classmethod
     def parse(cls, stream):
@@ -21,6 +29,8 @@ class _put:
 
         return cls(target, node)
 
+
+
 @dataclass
 class _print:
     target : expr.node
@@ -28,6 +38,13 @@ class _print:
     @classmethod
     def parse(cls, stream):
         return cls(expr.parse(stream))
+
+
+    def generate(self, output, scope):
+        self.target.generate(output, scope)
+        output('push', 'rax')
+        output('call', 'print')
+        output('add', 'rsp', 8)
 
 
 

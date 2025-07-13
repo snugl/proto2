@@ -12,10 +12,16 @@ def compile(path):
 
     output = emission.Buffer()
     root.infer()
+    root.generate(output)
 
-    print(root.locals)
+    output('mov', 'rax', 60)
+    output('mov', 'rdi', 0)
+    output('syscall')
+    output.assemble('main')
 
-    print(output.buffer)
+
+    print(output.render())
+
 
 
 

@@ -1,6 +1,7 @@
 
 
 run: build
+	./main
 
 build:
 	./compiler/main.py prg/test.snug

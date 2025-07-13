@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 import sym
 import error
+import util
 
 @dataclass
 class node:
@@ -11,119 +12,24 @@ class node:
     left  : 'node | None' = None
     right : 'node | None' = None
 
-    #generate reads from acc
-    def write(self, output, ctx):
-        #either variable or dot operator
-
-        match self.kind:
-            case 'var' if self.content in ctx.vars: #might be global constant
-                output('store', ctx.vars[self.content])
-            case 'op' if self.content == sym.op_dot and \
-                    type(self.left ) is node and \
-                    type(self.right) is node :
-                #preserve original
-                output('push') 
-
-                #compute target addr
-                self.right.generate(output, ctx)
-                output('push')
-                self.left.generate(output, ctx)
-                output('add')
-
-                #perform enref
-                output('ref')
-                
-            case x:
-                error.error(f"Unable to write to expression {self.content} of type {x}");
-                
-
      
     #generate outputs to acc
-    def generate(self, output, ctx):
-        def bool_normalize():
-            output('push')
-            output('const', 1)
-            output('and')
-
-
-        vars = ctx.vars
+    def generate(self, output, scope):
+        vars = scope.locals
         match self.kind:
             case 'num':
-                output('const', self.content)
+                output('mov', 'rax', self.content)
             case 'var' if self.content in vars:
-                output('load', vars[self.content])
-            case 'var' if self.content in ctx.tree.consts:
-                output('const', ctx.tree.consts[self.content])
+                addr = util.var_to_addr(vars[self.content])
+                output('mov', 'rax', f'[rbp-{addr}]')
             case 'op' if type(self.left) is node and type(self.right) is node:
-                oper = self.content
+                self.right.generate(output, scope)
+                output('push', 'rax')
+                self.left.generate(output, scope)
+                output('pop', 'rbx')
 
-                if oper != sym.op_assign:
-                    self.right.generate(output, ctx)
-                    output('push')
-                    self.left.generate(output, ctx)
-
-                match oper:
-                    case sym.op_assign:
-                        self.right.generate(output, ctx)
-                        self.left.write(output, ctx)
-
-                    case sym.op_add:     output('add'),
-                    case sym.op_sub:     output('sub'),
-                    case sym.op_bit_or:  output('or')
-                    case sym.op_bit_and: output('and')
-                    case sym.op_gt :     output('greater'), #acc is greater
-                    case sym.op_lt :     output('lesser'),  #acc is lesser
-                    case sym.op_eq :     output('equal'),
-                    case sym.op_neq:     output('nequal'),
-                    case sym.op_mul:     output('mul'),
-
-
-                    case sym.op_dot:
-                        output('add')
-                        output('deref')
-
-                    case sym.op_ge:
-                        output('inc') #or equal
-                        output('greater')
-                    case sym.op_le:
-                        output('dec') #or equal
-                        output('lesser')
-
-                    case sym.op_boo_or:
-                        output('or')
-                        bool_normalize()
-
-                    case sym.op_boo_and:
-                        output('and')
-                        bool_normalize()
-
-
-                    case sym.op_pre_add:
-                        output('add')
-                        self.left.write(output, ctx)
-
-                    case sym.op_pre_sub:
-                        output('sub')
-                        self.left.write(output, ctx)
-
-
-                    case sym.op_post_add:
-                        output('add')
-                        self.left.write(output, ctx)
-                        output('sub')
-
-                    case sym.op_post_sub:
-                        output('sub')
-                        self.left.write(output, ctx)
-                        output('add')
-
-
-
-            case 'string':
-                output('string', f"'{self.content}'")
-
-            case 'char':
-                output('const', ord(self.content))
+                match self.content:
+                    case sym.op_add: output('add', 'rax', 'rbx'),
 
             case x:
                 error.error(f"Unable to evaluate to expression of type {x} and content '{self.content}'");
