@@ -42,9 +42,7 @@ class _print:
 
     def generate(self, output, scope):
         self.target.generate(output, scope)
-        output('push', 'rax')
         output('call', 'print')
-        output('add', 'rsp', 8)
 
 
 

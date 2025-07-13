@@ -12,7 +12,6 @@ class Buffer:
         "section .text",
         "",
         "print:    ",
-        "    mov rax, [rsp+8]",
         "    mov rbp, rsp    ;frame construction",
         "",
         "    dec rsp             ;push",
