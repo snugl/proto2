@@ -1,26 +1,18 @@
 
-from enum import Enum
-from enum import auto
 from dataclasses import dataclass
 from dataclasses import field
 
+import error
 
-class Kinds(Enum):
-    NONE  = auto()
-    IDEN  = auto()
-    NUMB  = auto()
-    SYMB  = auto()
-    SPACE = auto()
-    NEWLN = auto()
 
-    @classmethod
-    def get(cls, char):
-        match(char):
-            case x if x.isdigit():  return cls.NUMB
-            case x if x.isalpha():  return cls.IDEN
-            case ' ':               return cls.SPACE
-            case '\n':              return cls.NEWLN
-            case _:                 return cls.SYMB
+
+def get_kind(char):
+    match(char):
+        case x if x.isdigit():  return "numb"
+        case x if x.isalpha():  return "iden"
+        case ' ':               return "space"
+        case '\n':              return "newline"
+        case _:                 return "symb"
 
     
 
@@ -29,7 +21,7 @@ class Token:
     content : str
     line    : int
     path    : str
-    kind    : Kinds
+    kind    : str
 
     def __str__(self):
         return self.content
@@ -90,9 +82,9 @@ def tokenize(path):
 
     buffer = []
     line = 0
-    kind_old = Kinds.NONE
+    kind_old = 'invalid'
     for char in source:
-        kind_new = Kinds.get(char)
+        kind_new = get_kind(char)
 
         if char == '\n':
             line += 1
@@ -101,7 +93,7 @@ def tokenize(path):
             token_content = "".join(buffer)
             buffer = []
 
-            if kind_old not in (Kinds.NONE, Kinds.SPACE, Kinds.NEWLN):
+            if kind_old not in ('invalid', 'space', 'newline'):
                 stream.append(Token(
                     token_content, line, path, kind_old
                 ))

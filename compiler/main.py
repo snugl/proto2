@@ -2,10 +2,13 @@
 import sys
 
 import lex
+import tree
 
 
 def compile(path):
     stream = lex.tokenize(path)
+    root = tree.parse(stream)
+
     print(stream)
 
 
