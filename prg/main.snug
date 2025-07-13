@@ -2,10 +2,9 @@
 
 
 put a = 10;
-put b = a + 5;
+put b = a + a + 5;
 
 print b;
-
 
 
 

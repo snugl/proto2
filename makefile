@@ -4,7 +4,7 @@ run: build
 	./main
 
 build:
-	./compiler/main.py prg/test.snug
+	./compiler/main.py prg/main.snug
 
 push:
 	git push

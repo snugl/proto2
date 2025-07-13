@@ -27,6 +27,8 @@ class _put:
         stream.expect("=")
         node = expr.parse(stream)
 
+        print(node)
+
         return cls(target, node)
 
 

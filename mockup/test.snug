@@ -1,0 +1,40 @@
+
+
+
+
+seq Name {
+    Test
+    
+};
+
+
+
+push lam {
+    pull _;
+    push _ + 1;
+};
+sub list::map;
+
+
+
+
+
+
+
+put f = lam {
+    sub mu;
+
+}
+
+
+
+put a = 10;
+put b = a + 5;
+
+print b;
+
+
+
+
+
+

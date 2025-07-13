@@ -10,6 +10,7 @@ def compile(path):
     stream = lex.tokenize(path)
     root = tree.Node.parse(stream, root=True)
 
+
     output = emission.Buffer()
     root.infer()
     root.generate(output)
