@@ -26,7 +26,6 @@
         -enum
         -count
 
-        -if
 
     -func
         -map
@@ -38,13 +37,14 @@
 
 
 -statements
+    -if         /
     -push
     -pull
     -[] for editing stack
     -sub
     -lam
-    -lab
-    -jump
+    -lab        /
+    -jump       /
     -syscall
     
 
