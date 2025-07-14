@@ -1,5 +1,6 @@
 
 from dataclasses import dataclass
+import typing
 
 import expr
 import error
@@ -28,6 +29,27 @@ class _put:
         node = expr.parse(stream)
 
         return cls(target, node)
+
+
+@dataclass
+class _if:
+    cond : expr.node
+    body : typing.Any
+
+    @classmethod
+    def parse(cls, stream):
+        cond = expr.parse(stream)
+        body = parse(stream)
+        return cls(cond, body)
+
+    def generate(self, output, scope):
+        fresh = output.fresh_label()
+
+        self.cond.generate(output, scope)
+        output('jz', fresh)
+        self.body.generate(output, scope)
+        output.def_label(fresh)
+
 
 
 @dataclass
@@ -83,8 +105,8 @@ def parse(stream):
         error.stream_error(stream, f"Invalid statement name: {iden}")
 
     obj = namespace[name].parse(stream)
-    #if iden not in ():
-    stream.expect(sym.eos)
+    if iden not in ('if'):
+        stream.expect(sym.eos)
 
     return obj
 

@@ -28,8 +28,19 @@ class node:
                 self.left.generate(output, scope)
                 output('pop', 'rbx')
 
+                op = self.content
+                is_cond_op = op in (sym.op_lt, sym.op_gt)
+                if is_cond_op:
+                    output('cmp', 'rax', 'rbx')
+
                 match self.content:
                     case sym.op_add: output('add', 'rax', 'rbx'),
+
+                    case sym.op_lt:  output('setl', 'al'),
+
+                if is_cond_op: #normalize
+                    output('and', 'rax', '0x01')
+
 
             case x:
                 error.error(f"Unable to evaluate to expression of type {x} and content '{self.content}'");
