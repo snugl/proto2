@@ -1,10 +1,17 @@
 
+put a = 0;
+put b = 1;
 
 
-put a = 10;
-put b = a + a + 5;
+lab loop;
+    put c = a + b;
 
-print b;
+    put a = b; 
+    put b = c;
+
+    print a;
+
+jump loop;
 
 
 
