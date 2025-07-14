@@ -115,7 +115,9 @@ class _lam:
 
         output('ret')
         output.def_label(skip_label)
-        output('push', lam_label)
+        output('mov', 'rax', lam_label)
+        output('mov', '[r10]', 'rax')
+        output('inc', 'r10')
 
 
 @dataclass
@@ -132,7 +134,8 @@ class _pull:
 
     def generate(self, output, scope):
         addr = util.var_to_addr(scope.locals[self.target])
-        output('pop', 'rax')
+        output('dec', 'r10')
+        output('mov', 'rax', '[r10]')
         output('mov', f'[rbp-{addr}]', 'rax')
 
 
@@ -148,8 +151,6 @@ class _sub:
     def generate(self, output, scope):
         self.node.generate(output, scope)
         output('call', 'rax')
-
-
 
 
 

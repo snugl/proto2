@@ -41,6 +41,7 @@ class Buffer:
         "       ret",
         "",
         "_start:"
+        "       mov     r10, stack_origin"
     ])
 
     label_generator : typing.Iterator = field(default_factory=lambda: itertools.count(0))
@@ -54,7 +55,10 @@ class Buffer:
         self.buffer.append(line)
 
     def render(self):
-        return "\n".join(self.buffer)
+        return "\n".join(self.buffer + [
+            "section .bbs",
+            "stack_origin:",
+        ])
 
     def assemble(self, path):
         with open('/tmp/output.asm', 'w') as f:
