@@ -1,0 +1,50 @@
+
+
+-global scope
+    -idenfitier scoping
+
+-dot operator
+-static memory built-in
+    -probably like baabnq
+-string literals
+    -always statically allocated
+
+-printf!!!!
+
+-seq
+    -name prefixing mechanism
+
+-libs (call it libs to distingish from normal lib directory)
+    -heap
+    -dyn
+    -lnk
+    -hashmap
+    -set
+    -
+    -lang
+        -iter
+        -enum
+        -count
+
+        -if
+
+    -func
+        -map
+        -filter
+        -iter
+        -
+
+
+
+
+-statements
+    -push
+    -pull
+    -[] for editing stack
+    -sub
+    -lam
+    -lab
+    -jump
+    -syscall
+    
+
