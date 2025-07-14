@@ -27,9 +27,34 @@ class _put:
         stream.expect("=")
         node = expr.parse(stream)
 
-        print(node)
-
         return cls(target, node)
+
+
+@dataclass
+class _lab:
+    label : str
+
+    def generate(self, output, scope):
+        scope.alloc_label(self.label, output)
+        output.def_label(scope.labels[self.label])
+
+
+    @classmethod
+    def parse(cls, stream):
+        return cls(stream.pop())
+
+
+@dataclass
+class _jump:
+    label : str
+
+    def generate(self, output, scope):
+        scope.alloc_label(self.label, output)
+        output('jmp', scope.labels[self.label])
+
+    @classmethod
+    def parse(cls, stream):
+        return cls(stream.pop())
 
 
 

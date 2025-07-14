@@ -3,10 +3,8 @@
 
 
 seq Name {
-    Test
-    
-};
-
+    IDEN,
+}
 
 
 push lam {
@@ -21,8 +19,8 @@ sub list::map;
 
 
 
+
 put f = lam {
-    sub mu;
 
 }
 

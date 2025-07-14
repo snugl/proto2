@@ -3,50 +3,47 @@ from dataclasses import dataclass
 from dataclasses import field
 
 import subprocess
+import typing
+import itertools
 
 @dataclass
 class Buffer:
     buffer : list[str] = field(default_factory=lambda: [
         "[bits 64]",
         "global _start",
+        "section .data",
+        "print_buffer:",
+        "   times 31 db 0",
+        "   db 10",
+        "",
         "section .text",
-        "",
-        "print:    ",
-        "    mov rbp, rsp    ;frame construction",
-        "",
-        "    dec rsp             ;push",
-        "    mov byte [rsp], 10  ;newline ",
-        "",
-        "    mov rdx, 1      ;length (+1 for newline)",
-        "render_loop:",
-        "    push rdx        ;save length",
-        "",
-        "    mov rdi, 10     ;divident",
-        "    mov rdx, 0      ;has to be zero for some fucking reason",
-        "    div rdi         ;divmod by 10",
-        "    mov cl, dl      ;write mod to c register",
-        "",
-        "    pop rdx         ;restore length",
-        "    inc rdx         ;inc length",
-        "",
-        "    add cl, '0'     ;compute ascii code",
-        "    dec rsp         ;push",
-        "    mov [rsp], cl   ;write code to stack",
-        "",
-        "    ;loop control",
-        "    sub rax, 0      ",
-        "    jnz render_loop",
-        "    ",
-        "    mov rax, 1      ;write to fd",
-        "    mov rdi, 1      ;stdout",
-        "    mov rsi, rsp    ;pointer into stack containing rendered number",
-        "    syscall",
-        "",
-        "    mov rsp, rbp    ;frame teardown",
-        "    ret",
+		"print:",
+		"       mov     rsi, 31",
+		"       mov     rcx, 10",
+		".L2:",
+		"       test    rax, rax",
+		"       je      .L5",
+		"       cqo",
+		"       dec     rsi",
+		"       idiv    rcx",
+		"       add     rdx, 48",
+		"       mov     byte [print_buffer + rsi], dl",
+		"       jmp     .L2",
+		".L5:",
+		"       mov     edx, 32",
+		"       mov     edi, 1",
+		"       sub     edx, esi",
+		"       movsx   rsi, esi",
+		"       movsx   rdx, edx",
+		"       add     rsi, print_buffer",
+		"		mov     rax, 1",
+		"		syscall",
+        "       ret",
         "",
         "_start:"
     ])
+
+    label_generator : typing.Iterator = field(default_factory=lambda: itertools.count(0))
 
     def __call__(self, *comm):
         inst, *args_raw = comm
@@ -65,6 +62,13 @@ class Buffer:
 
         subprocess.run(["nasm", "-o", "/tmp/output.o", "-f", "elf64", "/tmp/output.asm"])
         subprocess.run(["ld", "-o", path, "/tmp/output.o"])
+
+    def fresh_label(self):
+        id = next(self.label_generator)
+        return f't{id}'
+
+    def def_label(self, name):
+        self.buffer.append(f'{name}:')
 
 
 

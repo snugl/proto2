@@ -12,8 +12,15 @@ import objs
 class Node:
     subs   : list['Node']   = field(default_factory=lambda: [])
     locals : dict[str, int] = field(default_factory=lambda: {})
+    labels : dict[str, str] = field(default_factory=lambda: {})
 
     var_allocer : typing.Iterator = field(default_factory=lambda: itertools.count(0))
+
+    def alloc_label(self, name, output):
+        if name not in self.labels:
+            real = output.fresh_label()
+            self.labels[name] = real
+
 
     def alloc_var(self, name):
         if name not in self.locals:

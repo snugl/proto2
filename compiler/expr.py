@@ -39,11 +39,9 @@ class node:
 def parse_expr(stream, prec_level) -> node:
     left = parse_higher(stream, prec_level)
 
-    print(stream.peek())
     if str(stream.peek()) not in sym.prec[prec_level]:
         return left
 
-    print('good')
 
     op = stream.pop()
     right = parse_expr(stream, prec_level)
