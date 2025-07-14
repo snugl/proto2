@@ -9,9 +9,10 @@ lab loop;
     put a = b; 
     put b = c;
 
-    print a;
+    print c;
 
-jump loop;
+if c < 10000
+    jump loop;
 
 
 
