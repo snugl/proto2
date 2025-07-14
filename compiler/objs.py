@@ -6,6 +6,7 @@ import expr
 import error
 import sym
 import util
+import tree
 
 @dataclass
 class _put:
@@ -92,6 +93,62 @@ class _print:
     def generate(self, output, scope):
         self.target.generate(output, scope)
         output('call', 'print')
+
+
+@dataclass
+class _lam:
+    body : 'tree.Node'
+
+    @classmethod
+    def parse(cls, stream):
+        body = tree.Node.parse(stream)
+        return cls(body)
+
+    def generate(self, output, scope):
+        skip_label = output.fresh_label()
+        lam_label = output.fresh_label()
+
+        output('jmp', skip_label)
+        output.def_label(lam_label)
+
+        self.body.generate(output)
+
+        output('ret')
+        output.def_label(skip_label)
+        output('push', lam_label)
+
+
+@dataclass
+class _pull:
+    target : str
+
+    @classmethod
+    def parse(cls, stream):
+        return cls(stream.pop())
+
+    def infer(self, scope):
+        scope.alloc_var(self.target)
+
+
+    def generate(self, output, scope):
+        addr = util.var_to_addr(scope.locals[self.target])
+        output('pop', 'rax')
+        output('mov', f'[rbp-{addr}]', 'rax')
+
+
+
+@dataclass
+class _sub:
+    node : expr.node
+
+    @classmethod
+    def parse(cls, stream):
+        return cls(expr.parse(stream))
+
+    def generate(self, output, scope):
+        self.node.generate(output, scope)
+        output('call', 'rax')
+
 
 
 
