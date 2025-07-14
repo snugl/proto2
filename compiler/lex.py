@@ -12,6 +12,7 @@ def get_kind(char):
         case x if x.isalpha():  return "iden"
         case ' ':               return "space"
         case '\n':              return "newline"
+        case ';':               return "eos"
         case _:                 return "symb"
 
     
