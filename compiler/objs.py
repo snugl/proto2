@@ -31,6 +31,19 @@ class _put:
         return cls(target, node)
 
 
+
+@dataclass
+class _asm:
+    content : str
+
+    @classmethod
+    def parse(cls, stream, ctx):
+        return cls(stream.pop())
+
+    def generate(self, output, scope):
+        output(self.content)
+
+
 @dataclass
 class _if:
     cond : expr.node

@@ -13,6 +13,7 @@ def get_kind(char):
         case ' ':               return "space"
         case '\n':              return "newline"
         case ';':               return "eos"
+        case "'":               return "quote"
         case _:                 return "symb"
 
     
@@ -84,13 +85,19 @@ def tokenize(path):
     buffer = []
     line = 0
     kind_old = 'invalid'
+
+    #modes
+    string = False
+
     for char in source:
         kind_new = get_kind(char)
+
+        if kind_old == 'quote': string = not string
 
         if char == '\n':
             line += 1
 
-        if kind_new != kind_old:
+        if kind_new != kind_old and not string:
             token_content = "".join(buffer)
             buffer = []
 
@@ -102,10 +109,12 @@ def tokenize(path):
 
 
 
-        buffer.append(char)
+        if kind_new != 'quote':
+            buffer.append(char)
         kind_old = kind_new
 
 
+    print(stream)
     return stream
 
 
