@@ -15,7 +15,7 @@ class node:
      
     #generate outputs to acc
     def generate(self, output, scope):
-        vars = scope.locals
+        vars = scope.ctx.vars
         match self.kind:
             case 'num':
                 output('mov', 'rax', self.content)
@@ -101,7 +101,7 @@ def parse_terminal(stream) -> node:
             error.stream_error(stream, f"Unable to parse terminal '{x}' of type {x.kind}")
 
 
-def parse(stream) -> node:
+def parse(stream, ctx) -> node:
     return parse_expr(stream, 0)
 
 

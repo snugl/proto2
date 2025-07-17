@@ -19,15 +19,15 @@ class _put:
     def generate(self, output, scope):
         self.expr.generate(output, scope)
 
-        addr = util.var_to_addr(scope.locals[self.target])
+        addr = util.var_to_addr(scope.ctx.locals[self.target])
         output('mov', f'[rbp-{addr}]', 'rax')
         
     
     @classmethod
-    def parse(cls, stream):
+    def parse(cls, stream, ctx):
         target = stream.pop()
         stream.expect("=")
-        node = expr.parse(stream)
+        node = expr.parse(stream, ctx)
 
         return cls(target, node)
 
@@ -38,9 +38,9 @@ class _if:
     body : typing.Any
 
     @classmethod
-    def parse(cls, stream):
-        cond = expr.parse(stream)
-        body = parse(stream)
+    def parse(cls, stream, ctx):
+        cond = expr.parse(stream, ctx)
+        body = parse(stream, ctx)
         return cls(cond, body)
 
     def generate(self, output, scope):
@@ -63,7 +63,7 @@ class _lab:
 
 
     @classmethod
-    def parse(cls, stream):
+    def parse(cls, stream, ctx):
         return cls(stream.pop())
 
 
@@ -76,7 +76,7 @@ class _jump:
         output('jmp', scope.labels[self.label])
 
     @classmethod
-    def parse(cls, stream):
+    def parse(cls, stream, ctx):
         return cls(stream.pop())
 
 
@@ -86,8 +86,8 @@ class _print:
     target : expr.node
 
     @classmethod
-    def parse(cls, stream):
-        return cls(expr.parse(stream))
+    def parse(cls, stream, ctx):
+        return cls(expr.parse(stream, ctx))
 
 
     def generate(self, output, scope):
@@ -97,11 +97,11 @@ class _print:
 
 @dataclass
 class _lam:
-    body : 'tree.Node'
+    body : 'tree.node'
 
     @classmethod
-    def parse(cls, stream):
-        body = tree.Node.parse(stream)
+    def parse(cls, stream, ctx):
+        body = tree.node.parse(stream, ctx)
         return cls(body)
 
     def generate(self, output, scope):
@@ -125,15 +125,15 @@ class _pull:
     target : str
 
     @classmethod
-    def parse(cls, stream):
+    def parse(cls, stream, ctx):
         return cls(stream.pop())
 
     def infer(self, scope):
-        scope.alloc_var(self.target)
+        scope.ctx.alloc_var(self.target)
 
 
     def generate(self, output, scope):
-        addr = util.var_to_addr(scope.locals[self.target])
+        addr = util.var_to_addr(scope.ctx.vars[self.target])
         output('dec', 'r10')
         output('mov', 'rax', '[r10]')
         output('mov', f'[rbp-{addr}]', 'rax')
@@ -145,8 +145,8 @@ class _sub:
     node : expr.node
 
     @classmethod
-    def parse(cls, stream):
-        return cls(expr.parse(stream))
+    def parse(cls, stream, ctx):
+        return cls(expr.parse(stream, ctx))
 
     def generate(self, output, scope):
         self.node.generate(output, scope)
@@ -154,7 +154,7 @@ class _sub:
 
 
 
-def parse(stream):
+def parse(stream, ctx):
     iden = stream.pop()
     name = f"_{iden}"
 
@@ -162,7 +162,7 @@ def parse(stream):
     if name not in namespace:
         error.stream_error(stream, f"Invalid statement name: {iden}")
 
-    obj = namespace[name].parse(stream)
+    obj = namespace[name].parse(stream, ctx)
     if iden not in ('if'):
         stream.expect(sym.eos)
 

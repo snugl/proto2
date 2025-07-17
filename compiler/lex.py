@@ -56,8 +56,8 @@ class Stream:
         return self.last_token
 
     def expect(self, content):
-        token = self._pop()
-        if content != str(token):
+        token = self.pop()
+        if content != token:
             error.path_line_error(
                 self.last_token.path, 
                 self.last_token.line, 

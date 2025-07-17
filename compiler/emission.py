@@ -7,7 +7,7 @@ import typing
 import itertools
 
 @dataclass
-class Buffer:
+class buffer:
     buffer : list[str] = field(default_factory=lambda: [
         "[bits 64]",
         "global _start",

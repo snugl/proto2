@@ -8,20 +8,10 @@ import emission
 
 def compile(path):
     stream = lex.tokenize(path)
-    root = tree.Node.parse(stream, root=True)
+    ctx = tree.ctx.parse(stream)
+    ctx.compile()
 
-
-    output = emission.Buffer()
-    root.infer()
-    root.generate(output)
-
-    output('mov', 'rax', 60)
-    output('mov', 'rdi', 0)
-    output('syscall')
-    output.assemble('main')
-
-
-    print(output.render())
+    print(ctx.render())
 
 
 
