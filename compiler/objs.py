@@ -13,10 +13,10 @@ class _put:
     expr : expr.node
 
     def infer(self, scope):
-        scope.alloc_var(self.target)
+        scope.ctx.alloc_var(self.target)
 
     def generate(self, output, scope):
-        self.expr.generate(output, scope)
+        self.expr.gen_write(output, scope)
 
         addr = scope.ctx.var_addr(self.target)
         output('mov', f'[{addr}]', 'rax')
@@ -58,7 +58,7 @@ class _if:
     def generate(self, output, scope):
         fresh = output.fresh_label()
 
-        self.cond.generate(output, scope)
+        self.cond.gen_write(output, scope)
         output('jz', fresh)
         self.body.generate(output, scope)
         output.def_label(fresh)

@@ -40,9 +40,9 @@ class node:
                 addr = scope.ctx.var_addr(self.content)
                 output('mov', 'rax', f'[{addr}]')
             case 'op' if type(self.left) is node and type(self.right) is node:
-                self.right.generate(output, scope)
+                self.right.gen_write(output, scope)
                 output('push', 'rax')
-                self.left.generate(output, scope)
+                self.left.gen_write(output, scope)
                 output('pop', 'rbx')
 
                 op = self.content

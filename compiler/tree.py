@@ -32,12 +32,8 @@ class node:
                 sub.infer(self)
 
     def generate(self, output):
-        output('pop', 'r10')
-
         for sub in self.subs:
             sub.generate(output, self)
-
-        output('push', 'r10')
 
 
     @classmethod
