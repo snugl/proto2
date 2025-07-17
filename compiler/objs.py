@@ -110,6 +110,7 @@ class _lam:
         skip_label = output.fresh_label()
         lam_label = output.fresh_label()
 
+        output('push', lam_label)
         output('jmp', skip_label)
         output.def_label(lam_label)
 
@@ -117,7 +118,36 @@ class _lam:
 
         output('ret')
         output.def_label(skip_label)
-        output('push', lam_label)
+
+@dataclass
+class _rout:
+    name : str
+    body : 'tree.node'
+
+    @classmethod
+    def parse(cls, stream, ctx):
+        name = stream.pop()
+        body = tree.node.parse(stream, ctx)
+        return cls(name, body)
+
+    def infer(self, scope):
+        scope.ctx.alloc_var(self.name)
+        self.body.infer(scope)
+
+    def generate(self, output, scope):
+        skip_label = output.fresh_label()
+        lam_label = output.fresh_label()
+
+        addr = scope.ctx.var_addr(self.name)
+        output('mov', f'qword [{addr}]', lam_label)
+        output('jmp', skip_label)
+        output.def_label(lam_label)
+
+        self.body.generate(output)
+
+        output('ret')
+        output.def_label(skip_label)
+
 
 
 @dataclass
@@ -177,7 +207,7 @@ def parse(stream, ctx):
         error.stream_error(stream, f"Invalid statement name: {iden}")
 
     obj = namespace[name].parse(stream, ctx)
-    if iden not in ('if'):
+    if iden not in ('if', 'rout'):
         stream.expect(sym.eos)
 
     return obj
