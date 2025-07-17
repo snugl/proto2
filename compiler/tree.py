@@ -26,7 +26,7 @@ class node:
 
 
 
-    def infer(self):
+    def infer(self, scope):
         for sub in self.subs:
             if hasattr(sub, 'infer'):
                 sub.infer(self)
@@ -71,7 +71,7 @@ class ctx:
         if name not in self.vars:
             error.error(f"Unable to resolve variable name {name}")
 
-        addr = self.vars[name]
+        addr = self.vars[name] * 8
         return f'vars + {addr}'
 
     @classmethod
@@ -84,7 +84,7 @@ class ctx:
 
 
     def compile(self):
-        self.root.infer()
+        self.root.infer(self.root)
         self.root.generate(self.output)
 
         #exit syscall

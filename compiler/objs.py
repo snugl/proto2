@@ -103,6 +103,9 @@ class _lam:
         body = tree.node.parse(stream, ctx)
         return cls(body)
 
+    def infer(self, scope):
+        self.body.infer(scope)
+
     def generate(self, output, scope):
         skip_label = output.fresh_label()
         lam_label = output.fresh_label()
@@ -138,7 +141,7 @@ class _push:
 
     @classmethod
     def parse(cls, stream, ctx):
-        return cls(stream.pop())
+        return cls(expr.parse(stream, ctx))
 
     def infer(self, scope):
         self.target.infer(scope)

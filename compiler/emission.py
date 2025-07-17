@@ -58,7 +58,7 @@ class buffer:
             "   times 31 db 0",
             "   db 10",
             "vars:",
-           f"   times {var_count*4} db 0"
+           f"   times {var_count*8} db 0"
         ]
 
 
