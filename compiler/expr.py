@@ -3,7 +3,6 @@ from dataclasses import dataclass
 
 import sym
 import error
-import util
 
 @dataclass
 class node:
@@ -20,8 +19,8 @@ class node:
             case 'num':
                 output('mov', 'rax', self.content)
             case 'var' if self.content in vars:
-                addr = util.var_to_addr(vars[self.content])
-                output('mov', 'rax', f'[rbp-{addr}]')
+                addr = scope.ctx.var_addr(self.content)
+                output('mov', 'rax', f'[{addr}]')
             case 'op' if type(self.left) is node and type(self.right) is node:
                 self.right.generate(output, scope)
                 output('push', 'rax')

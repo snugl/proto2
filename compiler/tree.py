@@ -5,6 +5,7 @@ import typing
 import itertools
 
 import objs
+import error
 import emission
 
 
@@ -31,21 +32,12 @@ class node:
                 sub.infer(self)
 
     def generate(self, output):
-        local_words = next(self.ctx.var_allocer)
-        local_bytes = local_words * 8 # 1 word => 8 bytes
-
-        #scope setup
-        output('push', 'rbp')
-        output('mov', 'rbp', 'rsp')
-        output('sub', 'rsp', local_bytes)
+        output('pop', 'r10')
 
         for sub in self.subs:
             sub.generate(output, self)
 
-        #scope teardown
-        output('add', 'rsp', local_bytes)
-        output('mov', 'rsp', 'rbp')
-        output('pop', 'rbp')
+        output('push', 'r10')
 
 
     @classmethod
@@ -75,6 +67,13 @@ class ctx:
         if name not in self.vars:
             self.vars[name] = next(self.var_allocer)
 
+    def var_addr(self, name):
+        if name not in self.vars:
+            error.error(f"Unable to resolve variable name {name}")
+
+        addr = self.vars[name]
+        return f'vars + {addr}'
+
     @classmethod
     def parse(cls, stream):
         self = cls()
@@ -93,6 +92,9 @@ class ctx:
         self.output('mov', 'rdi', 0)
         self.output('syscall')
 
+        var_count = next(self.var_allocer)
+
+        self.output.finalize(var_count)
         self.output.assemble('main')
 
 

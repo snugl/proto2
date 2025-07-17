@@ -5,7 +5,6 @@ import typing
 import expr
 import error
 import sym
-import util
 import tree
 
 @dataclass
@@ -19,8 +18,8 @@ class _put:
     def generate(self, output, scope):
         self.expr.generate(output, scope)
 
-        addr = util.var_to_addr(scope.ctx.locals[self.target])
-        output('mov', f'[rbp-{addr}]', 'rax')
+        addr = scope.ctx.var_addr(self.target)
+        output('mov', f'[{addr}]', 'rax')
         
     
     @classmethod
@@ -115,9 +114,7 @@ class _lam:
 
         output('ret')
         output.def_label(skip_label)
-        output('mov', 'rax', lam_label)
-        output('mov', '[r10]', 'rax')
-        output('inc', 'r10')
+        output('push', lam_label)
 
 
 @dataclass
@@ -133,10 +130,8 @@ class _pull:
 
 
     def generate(self, output, scope):
-        addr = util.var_to_addr(scope.ctx.vars[self.target])
-        output('dec', 'r10')
-        output('mov', 'rax', '[r10]')
-        output('mov', f'[rbp-{addr}]', 'rax')
+        addr = scope.ctx.var_addr(self.target)
+        output('pop', f'QWORD [{addr}]')
 
 
 

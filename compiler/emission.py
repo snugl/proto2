@@ -11,10 +11,6 @@ class buffer:
     buffer : list[str] = field(default_factory=lambda: [
         "[bits 64]",
         "global _start",
-        "section .data",
-        "print_buffer:",
-        "   times 31 db 0",
-        "   db 10",
         "",
         "section .text",
 		"print:",
@@ -41,7 +37,6 @@ class buffer:
         "       ret",
         "",
         "_start:"
-        "       mov     r10, stack_origin"
     ])
 
     label_generator : typing.Iterator = field(default_factory=lambda: itertools.count(0))
@@ -54,11 +49,21 @@ class buffer:
         line = f"\t {inst} {', '.join(args)}"
         self.buffer.append(line)
 
+
+    def finalize(self, var_count):
+        self.buffer += [
+            "",
+            "section .data",
+            "print_buffer:",
+            "   times 31 db 0",
+            "   db 10",
+            "vars:",
+           f"   times {var_count*4} db 0"
+        ]
+
+
     def render(self):
-        return "\n".join(self.buffer + [
-            "section .bbs",
-            "stack_origin:",
-        ])
+        return "\n".join(self.buffer)
 
     def assemble(self, path):
         with open('/tmp/output.asm', 'w') as f:
