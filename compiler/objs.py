@@ -90,7 +90,7 @@ class _print:
 
 
     def generate(self, output, scope):
-        self.target.generate(output, scope)
+        self.target.gen_write(output, scope)
         output('call', 'print')
 
 
@@ -119,19 +119,35 @@ class _lam:
 
 @dataclass
 class _pull:
-    target : str
+    target : expr.node
+
+    @classmethod
+    def parse(cls, stream, ctx):
+        return cls(expr.parse(stream, ctx))
+
+    def infer(self, scope):
+        self.target.infer(scope)
+
+    def generate(self, output, scope):
+        output('pop', 'rax')
+        self.target.gen_read(output, scope)
+
+@dataclass
+class _push:
+    target : expr.node
 
     @classmethod
     def parse(cls, stream, ctx):
         return cls(stream.pop())
 
     def infer(self, scope):
-        scope.ctx.alloc_var(self.target)
-
+        self.target.infer(scope)
 
     def generate(self, output, scope):
-        addr = scope.ctx.var_addr(self.target)
-        output('pop', f'QWORD [{addr}]')
+        self.target.gen_write(output, scope)
+        output('push', 'rax')
+
+    
 
 
 
@@ -144,7 +160,7 @@ class _sub:
         return cls(expr.parse(stream, ctx))
 
     def generate(self, output, scope):
-        self.node.generate(output, scope)
+        self.node.gen_write(output, scope)
         output('call', 'rax')
 
 

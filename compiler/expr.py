@@ -11,9 +11,27 @@ class node:
     left  : 'node | None' = None
     right : 'node | None' = None
 
+
+    def infer(self, scope):
+        #only variable can infer
+        if self.kind == 'var':
+            scope.ctx.alloc_var(self.content)
+
+    #generate read from rax
+    def gen_read(self, output, scope):
+        match self.kind:
+            case 'var' if self.content in scope.ctx.vars:
+                addr = scope.ctx.var_addr(self.content)
+                output('mov', f'[{addr}]', 'rax')
+            case 'op' if self.content == sym.op_dot:
+                error.error('TODO: implement write to dot operator')
+
+            case x:
+                error.error(f"Unable to write to expression {self.content} of type {x}");
+
      
-    #generate outputs to acc
-    def generate(self, output, scope):
+    #generate write to rax
+    def gen_write(self, output, scope):
         vars = scope.ctx.vars
         match self.kind:
             case 'num':
