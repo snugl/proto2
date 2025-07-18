@@ -1,18 +1,58 @@
 
-put a = 0;
-put b = 1;
+
+rout swap {
+    pull r;
+    
+    pull a;
+    pull b;
+    push a;
+    push b;
+
+    push r;
+}
+
+rout drop {
+    sub swap;
+    pull a;
+    sub swap;
+}
 
 
-lab loop;
-    put c = a + b;
 
-    put a = b; 
-    put b = c;
 
-    print c;
 
-if c < 10000
-    jump loop;
+rout putchr {
+    sub swap;
+
+    asm 'mov rax, 1';
+    asm 'mov rdi, 1';
+    asm 'mov rsi, rsp';
+    asm 'mov rdx, 1';
+    asm 'syscall';
+
+    sub drop;
+}
+
+
+rout puts {
+    sub swap;
+    pull str;
+    put index = 0;
+
+    lab loop;
+        push str.index;
+        sub putchr;
+        put index = index + 1;
+
+    if str.index != 0
+        jump loop;
+}
+
+
+
+push 'hello world';
+sub puts;
+
 
 
 

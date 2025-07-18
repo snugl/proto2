@@ -1,0 +1,20 @@
+
+put a = 0;
+put b = 1;
+
+
+lab loop;
+    put c = a + b;
+
+    put a = b; 
+    put b = c;
+
+    print c;
+
+if c < 10000
+    jump loop;
+
+
+
+
+
