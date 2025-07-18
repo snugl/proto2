@@ -114,7 +114,6 @@ def tokenize(path):
         kind_old = kind_new
 
 
-    print(stream)
     return stream
 
 

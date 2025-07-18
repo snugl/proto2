@@ -59,6 +59,11 @@ class node:
                     output('and', 'rax', '0x01')
 
 
+            case 'string':
+                str_addr = output.alloc_string(self.content)
+                output('mov', 'rax', str_addr)
+
+
             case x:
                 error.error(f"Unable to evaluate to expression of type {x} and content '{self.content}'");
 

@@ -8,11 +8,7 @@ import itertools
 
 @dataclass
 class buffer:
-    buffer : list[str] = field(default_factory=lambda: [
-        "[bits 64]",
-        "global _start",
-        "",
-        "section .text",
+    text_section : list[str] = field(default_factory=lambda: [
 		"print:",
 		"       mov     rsi, 31",
 		"       mov     rcx, 10",
@@ -39,6 +35,9 @@ class buffer:
         "_start:"
     ])
 
+    data_section : list[str] = field(default_factory=lambda: [])
+
+
     label_generator : typing.Iterator = field(default_factory=lambda: itertools.count(0))
 
     def __call__(self, *comm):
@@ -47,23 +46,31 @@ class buffer:
 
 
         line = f"\t {inst} {', '.join(args)}"
-        self.buffer.append(line)
+        self.text_section.append(line)
 
 
     def finalize(self, var_count):
-        self.buffer += [
-            "",
-            "section .data",
-            "print_buffer:",
-            "   times 31 db 0",
-            "   db 10",
+        self.data_section += [
             "vars:",
            f"   times {var_count*8} db 0"
         ]
 
 
     def render(self):
-        return "\n".join(self.buffer)
+        return "\n".join([
+            "[bits 64]",
+            "global _start",
+            "",
+            "section .text",
+            *self.text_section,
+            "",
+            "section .data",
+            *self.data_section,
+            "print_buffer:",
+            "   times 31 db 0",
+            "   db 10",
+
+        ])
 
     def assemble(self, path):
         with open('/tmp/output.asm', 'w') as f:
@@ -77,7 +84,13 @@ class buffer:
         return f't{id}'
 
     def def_label(self, name):
-        self.buffer.append(f'{name}:')
+        self.text_section.append(f'{name}:')
+
+
+    def alloc_string(self, content):
+        label = self.fresh_label()
+        self.data_section.append(f'{label}: db "{content}", 0')
+        return label
 
 
 
