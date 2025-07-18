@@ -14,6 +14,8 @@ def get_kind(char):
         case '\n':              return "newline"
         case ';':               return "eos"
         case "'":               return "quote"
+        case '(':               return "open_paran"
+        case ')':               return "close_paran"
         case _:                 return "symb"
 
     

@@ -46,16 +46,28 @@ class node:
                 output('pop', 'rbx')
 
                 op = self.content
-                is_cond_op = op in (sym.op_lt, sym.op_gt)
-                if is_cond_op:
+                if op in sym.op_cond:
                     output('cmp', 'rax', 'rbx')
 
                 match self.content:
                     case sym.op_add: output('add', 'rax', 'rbx'),
+                    case sym.op_sub: output('sub', 'rax', 'rbx'),
+                    case sym.op_mul: output('mul', 'rax', 'rbx'),
 
-                    case sym.op_lt:  output('setl', 'al'),
+                    case sym.op_gt:   output('setg' , 'al'),
+                    case sym.op_lt:   output('setl' , 'al'),
+                    case sym.op_ge:   output('setge', 'al'),
+                    case sym.op_le:   output('setle', 'al'),
+                    case sym.op_eq:   output('sete' , 'al'),
+                    case sym.op_neq:  output('setne', 'al'),
 
-                if is_cond_op: #normalize
+                    case sym.op_dot:  output('mov', 'rax', '[rax + rbx]')
+
+                    case sym.op_bit_and: output('and', 'rax', 'rbx')
+                    case sym.op_boo_and: output('and', 'rax', 'rbx')
+
+
+                if op in sym.op_cond + sym.op_bool: #normalize
                     output('and', 'rax', '0x01')
 
 

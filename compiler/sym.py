@@ -1,4 +1,3 @@
-binding = '~'
 assign = '='
 eos = ';'
 param_start = '('
@@ -20,6 +19,23 @@ op_bit_and = '&'
 op_bit_or  = '|'
 op_boo_and = '&&'
 op_boo_or  = '||'
+
+
+op_bool = (
+    op_boo_and,
+    op_boo_or,
+)
+
+
+op_cond = (
+    op_lt,
+    op_gt,
+    op_le,
+    op_ge,
+    op_eq,
+    op_neq,
+)
+
 
 #precedence
 prec = [

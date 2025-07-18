@@ -89,7 +89,11 @@ class buffer:
 
     def alloc_string(self, content):
         label = self.fresh_label()
-        self.data_section.append(f'{label}: db "{content}", 0')
+
+        escapee = content.encode('utf-8').decode('unicode_escape')
+        codebytes = list(escapee.encode('utf-8'))
+        codewords = ", ".join(map(str, codebytes))
+        self.data_section.append(f'{label}: dq {codewords}, 0')
         return label
 
 
