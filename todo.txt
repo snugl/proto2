@@ -1,8 +1,5 @@
 
 
--global scope
-    -idenfitier scoping
-
 -dot operator
 -static memory built-in
     -probably like baabnq
@@ -20,7 +17,6 @@
     -lnk
     -hashmap
     -set
-    -
     -lang
         -iter
         -enum
@@ -38,13 +34,17 @@
 
 -statements
     -if         /
-    -push
-    -pull
-    -[] for editing stack
-    -sub
-    -lam
+    -push       /
+    -pull       /
+    -sub        /
+    -lam        /
     -lab        /
     -jump       /
-    -syscall
+    -rout       /
+    -asm        /
+    -use
+
+    -static  
+    -seq
     
 
