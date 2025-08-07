@@ -28,12 +28,14 @@ def lex(raw):
 def run(prog):
 
     mem_size = 65536
-    heap_base = mem_size // 2
 
 
     pc = 0
     acc = 0
     mem = [0 for _ in range(mem_size)]
+
+    data = mem_size - 1
+
     stack = 0 #stack pointer
     base  = stack #base  pointer
 
@@ -41,22 +43,24 @@ def run(prog):
 
 
     def push(x):
+        nonlocal mem, data
+        mem[data] = x
+        data -= 1
+
+    def pull():
+        nonlocal mem, data
+        data += 1
+        return mem[data]
+
+    def sys_push(x):
         nonlocal mem, stack
         mem[stack] = x
         stack += 1
 
-    def pull():
+    def sys_pull():
         nonlocal mem, stack
         stack -= 1
         return mem[stack]
-
-    def block(content_size):
-        nonlocal stack, acc
-        real_size = content_size + 1
-
-        push(real_size)
-        acc = stack
-
 
     while pc < len(prog) and running:
         inst, arg = prog[pc]
@@ -98,17 +102,17 @@ def run(prog):
             #routines
             case 'call':
                 #flow control
-                push(pc)
+                sys_push(pc)
                 pc = arg
 
                 #frame control
-                push(base) #save base pointer
+                sys_push(base) #save base pointer
                 base = stack #construct new frame
 
             case 'return':
                 stack = base  #collaps current frame (if it even exists)
-                base = pull() #reconstruct old frame
-                pc = pull()   #reconstruct old flow
+                base = sys_pull() #reconstruct old frame
+                pc = sys_pull()   #reconstruct old flow
 
             #memory manage
             case 'alloc': #allocate n spaces on stack
@@ -117,11 +121,6 @@ def run(prog):
             case 'free':  #free n spaces on stack
                 stack -= arg
 
-            #i know what you are OwO
-            case 'trans': #alloc transient acc, base into acc
-                size = acc
-                block(size)
-                stack += size
 
             #for deref/ref: acc is addr
             case 'deref': #acc = *acc
@@ -130,61 +129,11 @@ def run(prog):
             case 'ref': #*acc = pull()
                 mem[acc] = pull()
 
-            
-            #heap
-            case 'pers': #size of block by acc
-                needed = acc + 1
-
-                # *collars and leashes you* let's go for walkies~
-                walker = heap_base
-
-                trial = needed
-                while trial > 0: #trial running
-                    if mem[walker] == 0:
-                        walker += 1
-                        trial  -= 1
-                    else:
-                        walker += mem[walker] #skip block
-                        trial = needed        #restart trial
-
-                ptr = walker - needed
-                mem[ptr] = needed #size header
-                acc = ptr + 1
-
-            
-            case 'void': #free block by zero'ing
-                start = acc - 1
-                end   = start + mem[start]
-
-                for addr in range(start, end):
-                    mem[addr] = 0
-
-            
-            case 'write':
-                print(chr(acc), end = '')
-                
-            case 'string':
-                string = (arg
-                    .strip("'")
-                    .encode('utf-8')
-                    .decode('unicode_escape') + '\0'
-                )
-                block(len(string))
-
-                for char in string:
-                    push(ord(char))
-
 
             #misc
             case 'debug': 
-                match arg:
-                    case 'expr':   print(acc)
-                    case 'char':   print(chr(acc), end = '')
-                    case 'value':  print(acc, end = '')
-                    case 'string':
-                        while mem[acc]:
-                            print(chr(mem[acc]), end = '')
-                            acc += 1
+                print(acc)
+
             case 'halt':  running = False
 
 
