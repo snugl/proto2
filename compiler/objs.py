@@ -63,18 +63,6 @@ class _debug:
 
 
 @dataclass
-class _write:
-    target: expr.node
-
-    @classmethod
-    def parse(cls, stream):
-        return cls(target = expr.parse(stream))
-
-    def generate(self, output, ctx):
-        self.target.generate(output, ctx)
-        output('write')
-
-@dataclass
 class _use:
     path : str
 
@@ -241,228 +229,7 @@ class _trans:
        self.target.infer(ctx)
 
     def generate(self, output, ctx):
-        self.size.generate(output, ctx)
-        output('trans')
-        self.target.write(output, ctx)
-
-
-@dataclass
-class _pers:
-    size   : expr.node
-    target : expr.node
-
-    @classmethod
-    def parse(cls, stream):
-        size = expr.parse(stream)
-        stream.expect(sym.binding)
-        target = expr.parse(stream)
-
-        return cls(size, target)
-
-    def infer(self, ctx):
-       self.target.infer(ctx)
-
-    def generate(self, output, ctx):
-        self.size.generate(output, ctx)
-        output('pers')
-        self.target.write(output, ctx)
-    
-@dataclass
-class _void:
-    target : expr.node
-
-    @classmethod
-    def parse(cls, stream):
-        target = expr.parse(stream)
-        return cls(target)
-
-    def generate(self, output, ctx):
-        self.target.generate(output, ctx)
-        output('void')
-
-
-
-@dataclass
-class _iter:
-    iterator : expr.node
-    block    : expr.node
-    body     : 'tree.node'
-    counter_var_addr : int = 0
-
-    @classmethod
-    def parse(cls, stream):
-        #header
-        iterator = expr.parse(stream)
-        stream.expect(sym.binding)
-        block = expr.parse(stream)
-
-        #body
-        stream.expect(sym.block_start)
-        body = tree.parse(stream)
-        stream.expect(sym.block_end)
-
-        return cls(iterator, block, body)
-
-    def infer(self, ctx):
-        self.iterator.infer(ctx)
-        self.counter_var_addr = next(ctx.var_allocer)
-        self.body.infer(ctx)
-
-    def generate(self, output, ctx):
-        #put block origin onto stack for save-keeping
-        self.block.generate(output, ctx) 
-        output('push')
-
-        #initalize counter
-        output('const', 0)
-        output('store', self.counter_var_addr)
-
-        #loop start
-        loop_start_addr = output.address()
-
-        #update iterator
-        output('dup')
-        output('load', self.counter_var_addr)
-        output('add')
-        output('deref')
-        self.iterator.write(output, ctx)
-
-        self.body.generate(output, ctx)
-
-        #aquire block length
-        output('dup')
-        output('pull')
-        output('dec')
-        output('deref')
-        output('dec') #length of block content, so discard header size
-        output('push')
-    
-        #increment loop
-        output('load', self.counter_var_addr)
-        output('inc')
-        output('store', self.counter_var_addr)
-
-        #repeat loop
-        output('lesser')
-        output('branch', loop_start_addr)
-
-        #remove block origin
-        output('free', 1)
-
-
-
-@dataclass
-class _enum:
-    iterator : expr.node
-    index    : expr.node
-    block    : expr.node
-    body     : 'tree.node'
-
-    @classmethod
-    def parse(cls, stream):
-        #header
-        iterator = expr.parse(stream)
-        stream.expect(sym.index)
-        index    = expr.parse(stream)
-        stream.expect(sym.binding)
-        block    = expr.parse(stream)
-
-        #body
-        stream.expect(sym.block_start)
-        body = tree.parse(stream)
-        stream.expect(sym.block_end)
-
-        return cls(iterator, index, block, body)
-
-    def infer(self, ctx):
-        self.iterator.infer(ctx)
-        self.index.infer(ctx)
-        self.body.infer(ctx)
-
-    def generate(self, output, ctx):
-        #put block origin onto stack for save-keeping
-        self.block.generate(output, ctx) 
-        output('push')
-
-        #initalize counter
-        output('const', 0)
-        self.index.write(output, ctx)
-
-        #loop start
-        loop_start_addr = output.address()
-
-        #update iterator
-        output('dup')
-        self.index.generate(output, ctx)
-        output('add')
-        output('deref')
-        self.iterator.write(output, ctx)
-
-        self.body.generate(output, ctx)
-
-        #aquire block length
-        output('dup')
-        output('pull')
-        output('dec')
-        output('deref')
-        output('dec') #length of block content, so discard header size
-        output('push')
-    
-        #increment loop
-        self.index.generate(output, ctx)
-        output('inc')
-        self.index.write(output, ctx)
-
-        #repeat loop
-        output('lesser')
-        output('branch', loop_start_addr)
-
-
-@dataclass
-class _count:
-    start    : expr.node
-    end      : expr.node
-    index    : expr.node
-    body     : 'tree.node'
-
-    @classmethod
-    def parse(cls, stream):
-        #header
-        index = expr.parse(stream)
-        stream.expect(sym.binding)
-        start = expr.parse(stream)
-        stream.expect(sym.ranger)
-        end   = expr.parse(stream)
-
-        #body
-        stream.expect(sym.block_start)
-        body = tree.parse(stream)
-        stream.expect(sym.block_end)
-
-        return cls(start, end, index, body)
-
-    def infer(self, ctx):
-        self.index.infer(ctx)
-        self.body.infer(ctx)
-
-    def generate(self, output, ctx):
-        #initalize index
-        self.start.generate(output, ctx)
-        self.index.write(output, ctx)
-
-        #loop start
-        loop_start_addr = output.address()
-
-        self.body.generate(output, ctx)
-
-        #loop end
-        self.index.generate(output, ctx)
-        output('inc')
-        self.index.write(output, ctx)
-        output('push')
-        self.end.generate(output, ctx)
-        output('greater')
-        output('branch', loop_start_addr)
+        pass
 
 
 @dataclass
@@ -480,6 +247,7 @@ class _defer:
             consts = {},
         )
         ctx.routine.sapling.inject(super)
+
 
 
 @dataclass
@@ -630,7 +398,7 @@ def parse(stream):
         error.stream_error(stream, f"Invalid statement name: {iden}")
 
     obj = namespace[name].parse(stream)
-    if iden not in ("rout", "seq", "iter", "enum", "count", "defer"):
+    if iden not in ("rout", "seq", "defer"):
         stream.expect(sym.eos)
 
     return obj

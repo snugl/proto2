@@ -34,7 +34,6 @@ def get_kind(char):
         case ")":               return 'close_paran'
         case "{":               return 'open_scope'
         case "}":               return 'close_scope'
-        case "`":               return 'backtick'
         case _:                 return 'symbol'
 
 
