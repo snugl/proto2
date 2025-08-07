@@ -1,0 +1,45 @@
+
+
+rout mul
+{
+    pull a;
+    pull b;
+    put c = 0;
+
+    lab loop;
+        jump done ~ a == 0;
+        put a = a - 1;
+        put c = c + b;
+
+        jump loop;
+    lab done;
+        
+    push c;
+}
+
+rout fac
+{
+    pull n;
+    push n;
+    
+    jump done ~ n == 1;
+
+    push n - 1;
+    sub fac;
+    sub mul;
+
+    lab done;
+}
+
+
+
+
+rout main
+{
+    push 5;
+    sub fac;
+    pull res;
+
+    debug res;
+}
+
