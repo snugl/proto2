@@ -14,52 +14,39 @@ import error
 @dataclass
 class _debug:
     target : expr.node | str
-    kind   : str = ''
+
     @classmethod
     def parse(cls, stream):
-
-        match stream.peek_raw().kind:
-            case 'quote': return cls(stream.pop(),       "string")
-            case _      : return cls(expr.parse(stream), "expr")
+        pass
 
     def generate(self, output, ctx):
-        match self.target:
-            case expr.node() as target:
-                target.generate(output, ctx)
-                output('debug', 'expr')
-            case str() as target:
-                read_embed = False
-                embed_buffer = []
-                for char in target + "\n":
-                    if char == '}':
-                        read_embed = False 
-                        embed = "".join(embed_buffer)
+        pass
 
-                        string_mode = embed.startswith('`')
-                        dotopr_mode = '.' in embed
-                        
-                        #python magic lol
-                        (var_name, field_name, *_) = (embed.strip('`').split('.') + [None])
-                        var_addr    = ctx.vars[var_name]
+@dataclass
+class _pull:
+    target : expr.node
 
-                        output('load', var_addr)
-                        if dotopr_mode:
-                            field_value = ctx.tree.consts[field_name]
-                            output('push')
-                            output('const', field_value)
-                            output('add')
-                            output('deref')
+    @classmethod
+    def parse(cls, stream):
+        return cls(expr.parse(stream))
 
-                        output('debug', 'string' if string_mode else 'value')
+    def generate(self, output, ctx):
+        output('pull')
+        self.target.write(output, ctx)
 
-                        embed_buffer = []
-                    elif char == '{':
-                        read_embed = True
-                    elif read_embed:
-                        embed_buffer.append(char)
-                    else:
-                        output('const', ord(char))
-                        output('debug', 'char')
+@dataclass
+class _push:
+    target : expr.node
+
+    @classmethod
+    def parse(cls, stream):
+        return cls(expr.parse(stream))
+
+    def generate(self, output, ctx):
+        self.target.generate(output, ctx)
+        output('push')
+
+
 
 
 @dataclass
