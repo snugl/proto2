@@ -1,5 +1,5 @@
 
-TARGET = mockup/fac.snug
+TARGET = prg/fac.snug
 
 run: compile
 	./vm.py build
