@@ -157,7 +157,9 @@ class _trans:
        self.target.infer(ctx)
 
     def generate(self, output, ctx):
-        pass
+        self.size.generate(output, ctx)
+        output('trans')
+        self.target.write(output, ctx)
 
 
 @dataclass
