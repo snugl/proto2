@@ -19,8 +19,8 @@ rout main
     debug a;
     debug b;
 
-    push heap; push a; sub Heap::Void;
-    push heap; push b; sub Heap::Void;
+    push a; sub Heap::Void;
+    push b; sub Heap::Void;
 
 
     push heap; push 5 - 1; sub Heap::New; pull c;
