@@ -1,14 +1,31 @@
 
+use 'lib/heap.snug';
 
 rout main
 {
-    trans 10 ~ a;
-    trans 5 ~ b;
-    trans 3 ~ c;
-    trans 100 ~ b;
+
+    trans 4096 ~ buffer;
+    push buffer;
+    push 4096;
+    sub Heap::Create;
+    pull heap;
+
+
+
+    push heap; push 10 - 1; sub Heap::New; pull a;
+    push heap; push  1 - 1; sub Heap::New; pull b;
+
 
     debug a;
     debug b;
+
+    push heap; push a; sub Heap::Void;
+    push heap; push b; sub Heap::Void;
+
+
+    push heap; push 5 - 1; sub Heap::New; pull c;
+    push heap; push 1 - 1; sub Heap::New; pull d;
+
     debug c;
-    debug b;
+    debug d;
 }
