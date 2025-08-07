@@ -1,0 +1,14 @@
+
+
+rout main
+{
+    trans 10 ~ a;
+    trans 5 ~ b;
+    trans 3 ~ c;
+    trans 100 ~ b;
+
+    debug a;
+    debug b;
+    debug c;
+    debug b;
+}
