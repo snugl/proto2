@@ -1,0 +1,36 @@
+
+
+seq Heap
+{
+    size,
+    buffer,
+}
+
+
+
+"(Buffer::Ptr, Size::Int) => (::Heap)
+rout Heap::Create
+{
+    pull size;
+    pull buffer;
+
+    put buffer.Heap::buffer = buffer;
+    put buffer.Heap::size = size - (Heap - 1);
+
+    push buffer;
+}
+
+
+
+"(::Heap, Req::Int) => (Chunk::Ptr)
+rout Heap::New
+{
+     
+}
+
+
+rout Heap::Void
+{
+}
+
+
