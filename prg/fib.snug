@@ -1,0 +1,18 @@
+
+rout main
+{
+    put a = 0;
+    put b = 1;
+
+    lab loop;
+        put c = a + b;
+
+        put a = b;
+        put b = c;
+
+        debug c;
+    jump loop ~ c < 1000;
+}
+
+
+
