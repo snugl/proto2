@@ -8,7 +8,6 @@ import expr
 import sym
 import emission
 import tree
-import abstract
 import error
 
 @dataclass
@@ -129,79 +128,17 @@ class _jump:
 @dataclass
 class _sub:
     target : str
-    imap : dict[str, expr.node] = field(default_factory=lambda: {})
 
     @classmethod
     def parse(cls, stream):
         target = stream.pop()
-
-        if stream.peek() == sym.eos:
-            return cls(target)
-
-        #interface
-        imap = {}
-        stream.expect(sym.param_start)
-        while stream.peek() != sym.param_end:
-            #callee side
-            internal = stream.pop()
-
-            #caller side
-            if stream.peek() == sym.binding:
-                stream.expect(sym.binding)
-                external = expr.parse(stream) #if stream.peek() != ";" else None
-            else: #auto infer mapped external expression
-                external = expr.node(
-                    kind = 'var',
-                    content = internal
-                )
-
-            #optional delimiter
-            if stream.peek() == ",":
-                stream.pop()
-
-            imap[internal] = external
-        stream.expect(sym.param_end)
-
-        return cls(target, imap)
-
-    def infer(self, ctx):
-        target_obj = ctx.tree.get_routine(self.target)
-        pinter = target_obj.pinter
-
-        for binding_name in pinter.out_param:
-            if binding_name not in self.imap:
-                error.error(f"Required out-parameter '{binding_name}' in call to routine {self.target} not bound")
-            variable_name = self.imap[binding_name].content
-            ctx.allocate_variable(variable_name)
-
+        return cls(target)
 
     def generate(self, output, ctx):
         target_obj = ctx.tree.get_routine(self.target)
-        pinter = target_obj.pinter
 
-        #construct in-paramter space
-        #THE ORDER IS IMPORTANT
-        for param in pinter.in_param:
-            if param not in self.imap:
-                error.error(f"Required in-parameter '{param}' in call to routine {self.target} not bound")
-
-            self.imap[param].generate(output, ctx)
-            output('push')
-
-        #construct out-parameter space
-        output('alloc', len(pinter.out_param))
-
-        #routine_origin = ctx.tree.lookup_routine_origin(target_obj.name)
         routine_reference = emission.reference(target_obj.name, None, output, entry=True)
         output('call', routine_reference)
-
-        #deconstruct out-parameters
-        for param in pinter.out_param[::-1]:
-            output('pull')
-            self.imap[param].write(output, ctx)
-
-        #deconstruct in-paramters
-        output('free', len(pinter.in_param))
 
 @dataclass
 class _trans:
@@ -247,8 +184,6 @@ class _rout:
     name  : str = ""
     sapling : 'tree.node' = field(default_factory=lambda: tree.node())
 
-    pinter : abstract.param_interface = field(default_factory=lambda: abstract.param_interface())
-
     #local compilation context
     @dataclass
     class _ctx:
@@ -288,9 +223,6 @@ class _rout:
             routine = self
         )
 
-        #generate and interlace interface binding
-        ctx.vars.update(self.pinter.generate_variable_binding())
-
         #infer variables
         self.sapling.infer(ctx)
 
@@ -303,8 +235,6 @@ class _rout:
 
         #generate routine behavior
         self.sapling.generate(output, ctx)
-        #for node in self.sapling:
-        #    node.generate(output, ctx)
 
         #free variable space
         output("free", var_count)
@@ -321,16 +251,6 @@ class _rout:
         self = cls()
         self.name = stream.pop()
         
-        #interface
-        if stream.peek() == sym.param_start:
-            stream.expect(sym.param_start)
-            while stream.peek() != sym.param_end:
-                match stream.pop():
-                    case "in":  self.pinter.add_in(stream.pop())
-                    case "out": self.pinter.add_out(stream.pop())
-                stream.expect(sym.eos)
-            stream.expect(sym.param_end)
-
         stream.expect(sym.block_start)
         self.sapling = tree.parse(stream)
         stream.expect(sym.block_end)

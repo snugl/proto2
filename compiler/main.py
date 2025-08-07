@@ -19,11 +19,6 @@ def compile(path):
     entry = root.get_routine(entry_name)
     entry.generate(output, root)
 
-    #verify integrety
-    pcount = entry.pinter.get_space_size()
-    if pcount > 0:
-        error.error("Cannot bind parameter interface for entry function")
-
     #render ir
     entry_origin = output.lookup_routine(entry_name)
     build = output.assemble(entry_origin)
