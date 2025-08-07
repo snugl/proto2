@@ -13,14 +13,15 @@ import error
 
 @dataclass
 class _debug:
-    target : expr.node | str
+    target : expr.node
 
     @classmethod
     def parse(cls, stream):
-        pass
+        return cls(expr.parse(stream))
 
     def generate(self, output, ctx):
-        pass
+        self.target.generate(output, ctx)
+        output('debug')
 
 @dataclass
 class _pull:
@@ -29,6 +30,9 @@ class _pull:
     @classmethod
     def parse(cls, stream):
         return cls(expr.parse(stream))
+
+    def infer(self, ctx):
+        self.target.infer(ctx)
 
     def generate(self, output, ctx):
         output('pull')
@@ -265,8 +269,6 @@ class _rout:
                 if type(node) is _sub:
                     depend = tree.get_routine(node.target)
                     depend.generate(output, tree)
-                elif type(node) in (_iter, _enum, _count):
-                    walk(node.body)
 
         walk(self.sapling) 
 
