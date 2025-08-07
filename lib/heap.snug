@@ -14,8 +14,8 @@ rout Heap::Create
     pull size;
     pull buffer;
 
-    put buffer.Heap::buffer = buffer;
-    put buffer.Heap::size = size - (Heap - 1);
+    put buffer.Heap::buffer = buffer + Heap;
+    put buffer.Heap::size = size - Heap;
 
     push buffer;
 }
@@ -25,7 +25,38 @@ rout Heap::Create
 "(::Heap, Req::Int) => (Chunk::Ptr)
 rout Heap::New
 {
-     
+    pull request; 
+    pull heap;
+
+    put needed = request + 1;
+
+    " *collars and leashes you* let's go for walkies~
+    put walker = heap.Heap::buffer;
+
+    put trail = needed;
+    lab loop;
+        jump done ~ trail <= 0; 
+
+        put mustRestart = walker.0;
+        jump restart ~ mustRestart;
+            "advance trail
+            put walker = walker + 1; 
+            put trail  = trail  - 1;
+
+        jump loop;
+        lab restart;
+            "skip block
+            put walker = walker + walker.0;
+
+            "restart trail
+            put trail  = needed;
+
+        jump loop;
+    lab done;
+
+    put ptr = walker - needed;     
+    put ptr.0 = needed; "size header
+    push ptr + 1;
 }
 
 
