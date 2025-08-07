@@ -34,10 +34,9 @@ def run(prog):
     acc = 0
     mem = [0 for _ in range(mem_size)]
 
-    data = mem_size - 1
-
-    stack = 0 #stack pointer
-    base  = stack #base  pointer
+    data = mem_size - 1 #user pointer
+    stack = 0           #stack pointer
+    base  = stack       #base  pointer
 
     running = True
 
@@ -120,6 +119,12 @@ def run(prog):
 
             case 'free':  #free n spaces on stack
                 stack -= arg
+
+            #i know what you are OwO
+            case 'trans':
+                size = acc
+                acc = stack
+                stack += size
 
 
             #for deref/ref: acc is addr
