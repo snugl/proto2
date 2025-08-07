@@ -60,8 +60,22 @@ rout Heap::New
 }
 
 
+"(Chunk::Ptr)
 rout Heap::Void
 {
+    pull ptr;
+    
+    put start = ptr - 1;
+    put end   = start + start.0;
+    
+    lab loop;
+        jump done ~ start > end;
+
+        put start.0 = 0;
+        put start = start + 1;
+
+        jump loop;
+    lab done;
 }
 
 
