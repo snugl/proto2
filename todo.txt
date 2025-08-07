@@ -1,0 +1,14 @@
+
+-features
+    (-static allocation)
+    -string literals
+    -transient allocation
+
+-lib
+    -heap
+    -string
+
+-progs
+    -eval
+
+
