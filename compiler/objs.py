@@ -299,6 +299,24 @@ class _seq:
         return consts
 
 
+@dataclass
+class _const:
+    name : str
+    value : int
+
+    @classmethod
+    def parse(cls, stream):
+        name = stream.pop()
+        stream.expect(sym.op_assign)
+        value = stream.pop()
+
+        if not value.isdigit():
+            error.stream_error(stream, "Value of constant has to be integer")
+
+        return cls(name, int(value))
+
+    def render_constants(self):
+        return { self.name : self.value }
 
 def parse(stream):
     iden = stream.pop()

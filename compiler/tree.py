@@ -46,10 +46,10 @@ class node:
     #making them accessable to local compilation context objs._rout._ctx
     def render_constants(self):
         for sub in self.subs:
-            if type(sub) is not objs._seq:
-                continue
+            t = type(sub)
+            if t is objs._seq or t is objs._const:
+                self.consts.update(sub.render_constants())
 
-            self.consts.update(sub.render_constants())
 
 
     def generate(self, output, ctx):
