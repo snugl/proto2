@@ -1,0 +1,22 @@
+
+
+rout Stack::Swap
+{
+    pull a;
+    pull b;
+    push a;
+    push b;
+}
+
+rout Stack::Dup
+{
+    pull a;
+    push a;
+    push a;
+}
+
+rout Stack::Drop
+{
+    pull a;
+}
+
