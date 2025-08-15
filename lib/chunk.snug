@@ -1,0 +1,88 @@
+
+use 'lib/stack.snug'
+
+"(Ptr::Chunk) => (Len::Int)
+rout Chunk::Len
+{
+    pull ptr;
+    put len = ptr.(0-1) - 1;
+    push len;
+}
+
+
+"(Ptr::Chunk) => (Sum::Int)
+rout Chunk::Sum
+{
+    pull ptr;
+
+    put sum = 0;
+
+    push ptr; sub Chunk::Len; pull i;
+    lab loop;
+        put i = i - 1;
+        put sum = sum + ptr.i;
+    jump loop ~ i > 0;
+
+    push ptr;
+}
+
+
+"(Ptr::Chunk, Offset::Int, Len::Int, First::Int)
+rout Chunk::Range
+{
+    pull first;
+    pull len;
+    pull offset;
+    pull ptr;
+
+    put i = 0;
+
+    lab loop;
+        put ptr.(offset + i) = (first + i);
+        put i = i + 1;
+    jump loop ~ i < len;
+}
+
+
+"(Ptr::Chunk)
+rout Chunk::Iota
+{
+    sub Stack::Dup;
+    sub Chunk::Len; pull len;
+
+    push 0;
+    push len;
+    push 0;
+    sub Chunk::Range;
+}
+
+
+
+"(Ptr::Chunk)
+rout Chunk::Debug
+{
+    sub Stack::Dup;
+    sub Chunk::Len; pull len;
+    pull ptr;
+
+    put i = 0;
+    lab loop;
+        debug ptr.i;
+        put i = i + 1;
+    jump loop ~ i < len;
+}
+
+
+"(Ptr::Chunk)
+rout Chunk::Zero
+{
+    sub Stack::Dup;
+    sub Chunk::Len; pull len;
+    pull ptr;
+
+    put i = 0;
+    lab loop;
+        put ptr.i = 0;
+        put i = i + 1;
+    jump loop ~ i < len;
+}
