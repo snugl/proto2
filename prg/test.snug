@@ -1,12 +1,15 @@
 
 use 'lib/heap.snug';
 
+const cfg_heap_size = 4096;
+
 rout main
 {
+    debug cfg_heap_size;
 
-    trans 4096 ~ buffer;
+    trans cfg_heap_size ~ buffer;
     push buffer;
-    push 4096;
+    push cfg_heap_size;
     sub Heap::Create;
     pull heap;
 
