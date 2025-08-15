@@ -1,0 +1,88 @@
+
+
+
+
+seq Dyn
+{
+    size,
+    capacity,
+    container
+}
+
+
+"(::Heap, Capacity::Int) => (List::Dyn)
+rout Dyn::CreateReserve
+{
+    pull capacity;
+    pull heap;
+
+    push heap;
+    push Dyn;
+    sub Heap::New;
+    pull list;
+
+    push heap;
+    push capacity;
+    sub Heap::New;
+    pull list.Dyn::container;
+
+    put list.Dyn::size = 0;
+    put list.Dyn::capacity = capacity;
+    
+    push list;
+}
+
+"(::Heap) => (List::Dyn)
+rout Dyn::Create
+{
+    push 1;
+    sub Dyn::CreateReserve;
+}
+
+"(::Heap, List::Dyn)
+rout Dyn::Void
+{
+    pull heap;
+    pull list;
+
+    push heap;
+    push list.Dyn::container;
+    sub Heap::Void;
+
+    push heap;
+    push list;
+    sub Heap::Void;
+}
+
+
+"(::Heap, List::Dyn, Size::Int)
+rout Dyn::Ensure
+{
+    jump done ~ size < list.Dyn::size;
+    put list.Dyn::size = size;
+
+    jump done ~ size < list.Dyn::capacity;
+    put list.Dyn::capacity = list.Dyn::capacity << 1;
+
+    push heap;
+    push list.Dyn::capacity;
+    sub Heap::New;
+    pull contNew;
+
+    put i = 0;
+    lab loop;
+        put contNew.i = list.Dyn::container.i;
+        put i = i + 1;
+    jump loop ~ i < list.Dyn::size;
+
+    push heap;
+    push list.Dyn::container;
+    sub Heap::Void;
+
+    put list.Dyn::container = contNew;
+    
+    lab done;
+}
+
+
+
